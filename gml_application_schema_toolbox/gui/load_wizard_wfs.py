@@ -88,6 +88,9 @@ class LoadWizardWFS(QWizardPage, PAGE_1A_W):
         )
         if req_version == "auto" or not checked_version:
             # detect version
+            final_url = QUrl(uri)
+            final_url.setUserName(conn.uri().username())
+            final_url.setPassword(conn.uri().password())
             u = QUrlQuery()
             u.addQueryItem("request", "GetCapabilities")
             u.addQueryItem("service", "WFS")
@@ -95,7 +98,6 @@ class LoadWizardWFS(QWizardPage, PAGE_1A_W):
                 u.addQueryItem("acceptversions", "2.0.0,1.1.0,1.0.0")
             elif not checked_version:
                 u.addQueryItem("version", req_version)
-            final_url = QUrl(uri)
             final_url.setQuery(u)
 
             xml, ns_map = xml_parse(remote_open_from_qgis(final_url.toString()))
@@ -132,7 +134,7 @@ class LoadWizardWFS(QWizardPage, PAGE_1A_W):
             version = req_version
 
         with qgis_proxy_settings():
-            return WebFeatureService(url=uri, version=version)
+            return WebFeatureService(url=uri, version=version, username=conn.uri().username(), password=conn.uri().password())
 
     @pyqtSlot(str)
     def on_change_connection(self, currentConnection):
